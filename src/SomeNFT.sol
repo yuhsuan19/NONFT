@@ -8,8 +8,12 @@ contract SomeNFT is ERC721 {
 
     constructor() ERC721("Some NFT", "Some") {}
 
-    function freeMint() {
-        _mint(msg.sender, totalSupply);
+    function freeMint() external returns (uint256) {
+        uint256 tokenId = totalSupply;
+
+        _mint(msg.sender, tokenId);
         totalSupply = totalSupply + 1;
+
+        return tokenId;
     }
 }

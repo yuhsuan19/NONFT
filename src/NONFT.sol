@@ -12,8 +12,12 @@ contract NONFT is ERC721 {
         return "https://imgur.com/IBDi02f";
     }
 
-    function freeMint() {
-        _mint(msg.sender, totalSupply);
+    function freeMint() external returns (uint256) {
+        uint256 tokenId = totalSupply;
+
+        _mint(msg.sender, tokenId);
         totalSupply = totalSupply + 1;
+
+        return tokenId;
     }
 }

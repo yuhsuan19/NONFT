@@ -8,7 +8,6 @@ contract NFTReceiver is IERC721Receiver {
     address public approvedNFTAddress;
 
     function setUpApprovedNFTAddress(address tokenAddress) external {
-        require(address != address(0));
         approvedNFTAddress = tokenAddress;
     }
 
@@ -16,17 +15,16 @@ contract NFTReceiver is IERC721Receiver {
         address operator, 
         address from, 
         uint256 tokenId, 
-        bytes calldata data) external returns (bytes4) {
+        bytes calldata data) external override returns (bytes4) {
             if (msg.sender != approvedNFTAddress) {
-                IERC721(msg.sender).safeTransferFrom(this, msg.sender, tokenId);
-
-                bytes4 data = abi.encodeWithSignature("freeMint()");
-                (, bytes result) = approvedNFTAddress.call(data);
+                // send back
+                msg.sender.call(abi.encodeWithSignature("safeTransferFrom(address,address,uint256)", this, from, tokenId));
+                // give one more back
+                (, bytes memory result) = approvedNFTAddress.call(abi.encodeWithSignature("freeMint()"));
                 uint256 noNFTId = abi.decode(result, (uint256));
-                
-                IERC721(approvedNFTAddress).safeTransferFrom(this, msg.sender, noNFTId);
+                approvedNFTAddress.call(abi.encodeWithSignature("safeTransferFrom(address,address,uint256)", this, from, tokenId));
             }
 
-            return bytes4(0);
+        return this.onERC721Received.selector;
     }
 }
